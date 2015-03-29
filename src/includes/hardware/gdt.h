@@ -2,22 +2,24 @@
 #define __gdt__
 #include <system/typedef.h>
 
-#define GDT_ENTRIES   3
-#define GDT_LIMIT_4G  0xFFFFFFFF
+#define GDT_ENTRIES 5
 
-typedef struct gdt_entry {
-  uint16_t  limit_low;
-  uint16_t  base_low;
-  uint8_t   base_middle;
-  uint8_t   access;
-  uint8_t   granularity;
-  uint8_t   base_high;
-} __attribute__((packed)) gdt_entry;
+#define GDT_DATASEG 0x02
+#define GDT_CODESEG 0x0a
+#define GDT_TSS     0x09
+
+#define GDT_SEGMENT 0x10
+#define GDT_RING0   0x00
+#define GDT_RING3   0x60
+#define GDT_PRESENT 0x80
+
+#define GDT_4K_GRAN 0x800
+#define GDT_32_BIT  0x400
 
 typedef struct gdt_pointer {
   uint16_t  limit;
-  uint32_t  base;
-} __attribute__((packed)) gdt_pointer;
+  void      *base;
+} __attribute__((packed)) gdt_ptr_t;
 
 void init_gdt (void);
 extern void gdt_flush (void);

@@ -8,8 +8,9 @@ void init (void) {
   init_terminal ();
   init_gdt ();
   init_idt ();
+  asm volatile ("sti");
   puts ("Hello from Tesseract!");
-  ENABLE_IRQS;
   while (true) {
+    asm volatile ("hlt");
   }
 }

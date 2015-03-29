@@ -1,35 +1,59 @@
 #include <hardware/gdt.h>
 #include <system/typedef.h>
 
-gdt_entry   gdt[GDT_ENTRIES];
-gdt_pointer gdt_ptr;
+uint64_t    gdt[GDT_ENTRIES];
+gdt_ptr_t   gdt_ptr;
 
-void gdt_set_gate (uint8_t, uint32_t, uint32_t, uint8_t, uint8_t);
+void gdt_set_gate (uint8_t, uint32_t, uint32_t, int32_t);
+void gdt_set_ring0_gate (uint8_t, uint32_t, uint32_t, int32_t);
+void gdt_set_ring3_gate (uint8_t, uint32_t, uint32_t, int32_t);
 
 void init_gdt (void) {
-  gdt_ptr.limit = (sizeof (gdt_entry) * GDT_ENTRIES) - 1;
-  gdt_ptr.base  = (uint32_t) &gdt;
+  gdt_ptr.limit = GDT_ENTRIES * 8 - 1;
+  gdt_ptr.base  = &gdt;
 
   // Null descriptor
-  gdt_set_gate (0, 0, 0, 0, 0);
+  gdt_set_gate (0, 0, 0, 0);
 
   // Kernel code segment
-  gdt_set_gate (1, 0, GDT_LIMIT_4G, 0x9A, 0xCF);
+  gdt_set_ring0_gate (1, 0, 0xFFFFF,
+    GDT_SEGMENT | GDT_32_BIT | GDT_CODESEG | GDT_4K_GRAN | GDT_PRESENT);
 
-  // Kernel data segment
-  gdt_set_gate (2, 0, GDT_LIMIT_4G, 0x92, 0xCF);
+  // Kenel data segment
+  gdt_set_ring0_gate (2, 0, 0xFFFFF,
+    GDT_SEGMENT | GDT_32_BIT | GDT_DATASEG | GDT_4K_GRAN | GDT_PRESENT);
+
+  // User code segment
+  gdt_set_ring3_gate (3, 0, 0xFFFFF,
+    GDT_SEGMENT | GDT_32_BIT | GDT_CODESEG | GDT_4K_GRAN | GDT_PRESENT);
+
+  // User data segment
+  gdt_set_ring3_gate (4, 0, 0xFFFFF,
+    GDT_SEGMENT | GDT_32_BIT | GDT_CODESEG | GDT_4K_GRAN | GDT_PRESENT);
+
+  // TSS
+  //gdt_set_gate (5, 0, 0xFFFFF, GDT_TSS | GDT_RING3 | GDT_PRESENT);
+
+  // Load GDT
+  asm volatile ("lgdt %0" : : "m" (gdt_ptr));
 
   // Flush GDT
   gdt_flush ();
 }
 
-void gdt_set_gate
-  (uint8_t num, uint32_t base, uint32_t limit, uint8_t access, uint8_t gran) {
-  gdt[num].base_low     = (base)        & 0xFFFF;
-  gdt[num].base_middle  = (base >> 16)  & 0xFF;
-  gdt[num].base_high    = (base >> 24)  & 0xFF;
-  gdt[num].limit_low    = (limit)       & 0xFFFF;
-  gdt[num].granularity  = (limit >> 16) & 0x0F;
-  gdt[num].granularity |= (gran)        & 0xF0;
-  gdt[num].access       = (access);
+void gdt_set_ring0_gate (uint8_t i, uint32_t b, uint32_t l, int32_t f) {
+  gdt_set_gate (i, b, l, f | GDT_RING0);
+}
+
+void gdt_set_ring3_gate (uint8_t i, uint32_t b, uint32_t l, int32_t f) {
+  gdt_set_gate (i, b, l, f | GDT_RING3);
+}
+
+void gdt_set_gate (uint8_t num, uint32_t base, uint32_t limit, int32_t flags) {
+  gdt[num]  = limit           & 0xFFFFLL;
+  gdt[num] |= (base           & 0xFFFFFFLL) << 16;
+  gdt[num] |= (flags          & 0xFFLL)     << 40;
+  gdt[num] |= ((limit >> 16)  & 0xFLL)      << 48;
+  gdt[num] |= ((flags >> 8)   & 0xFFLL)     << 52;
+  gdt[num] |= ((base  >> 24)  & 0xFFLL)     << 56;
 }

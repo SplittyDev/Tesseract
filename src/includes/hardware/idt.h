@@ -15,11 +15,10 @@ typedef struct idt_entry {
 
 typedef struct idt_pointer {
   uint16_t  limit;
-  uint32_t  base;
+  void      *base;
 } __attribute__((packed)) idtptr_t;
 
 void init_idt (void);
 stackframe_t *idt_handle_general (stackframe_t *);
-extern void idt_load (void);
 
 #endif

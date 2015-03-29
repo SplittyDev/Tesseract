@@ -10,19 +10,23 @@ static inline uintptr_t *memcopy (
   return dest;
 }
 
-static inline uint8_t *memset
-  (uint8_t *dest, uint8_t value, size_t count) {
-  size_t i = 0;
-  for (; i < count; i++)
-    dest[i] = value;
+static inline void *memset (void *dest, uint8_t value, size_t size) {
+  if (size) {
+    int8_t *d = dest;
+    do {
+      *d++ = value;
+    } while (--size);
+  }
   return dest;
 }
 
-static inline uint16_t *memsetw
-  (uint16_t *dest, uint16_t value, size_t count) {
-  size_t i = 0;
-  for (; i < count; i++)
-    dest[i] = value;
+static inline void *memsetw (void *dest, uint16_t value, size_t size) {
+  if (size) {
+    int8_t *d = dest;
+    do {
+      *d++ = value;
+    } while (--size);
+  }
   return dest;
 }
 
