@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+if [ -d "$HOME/opt/cross/bin" ]; then
+  export PATH="$HOME/opt/cross/bin:$PATH"
+else
+  echo "Couldn't find crosscompiler."
+  echo "Please install your crosscompiler to ~/opt/cross"
+  echo "The executables should be located at ~/opt/cross/bin"
+  echo "Running environment\\setup should build and install \
+        an i686-elf gcc crosscompiler autmatically."
+  exit
+fi
+
+# Delete current kernel iso
+rm -f kernel.iso >/dev/null
+
+# Copy makefile and linker script
+# to source directory
+cp kernel.ld src/kernel.ld
+cp makefile src/makefile
+
+# Navigate to source directory
+cd src
+
+# Build kernel
+make
+
+# Remove makefile and linker script
+# from source directory
+rm -f kernel.ld
+rm -f makefile
+
+# Delete object files
+find . -name "*.o" -type f -delete
+
+if [ -f "kernel" ]; then
+  # Move kernel to base directory
+  mv kernel ../kernel
+else
+  echo -e "\e[31mBuilding your OS failed.\e[39m"
+  exit
+fi
+
+# Navigate back to base directory
+cd ../
+
+# Copy kernel to iso/boot directory
+cp kernel iso/boot/kernel.bin
+
+# Run Tesseract kernel
+./run

@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+# Build iso using grub-mkrescue
+if which grub-mkrescue >/dev/null; then
+  grub-mkrescue -o kernel.iso iso
+else
+  echo "grub-mkrescue couldn't be found."
+  echo "Please install it and run this file again."
+  echo "Running environment\\setup should install it automatically."
+  exit
+fi
+
+# Run kernel using qemu-system-x86_64
+if which qemu-system-i386 >/dev/null; then
+  qemu-system-i386 -cdrom kernel.iso
+else
+  echo "qemu-system-i386 couldn't be found."
+  echo "Please install it and run this file again."
+  echo "Running environment\\setup should install it automatically."
+  exit
+fi

@@ -1,0 +1,234 @@
+#!/usr/bin/env bash
+function main {
+  check_root
+  check_pm
+  prepare_make
+  update_packages
+  install_dependencies_apt
+  install_dependencies_yum
+  build_qemu
+  check_cc
+  create_kernel_env
+  echo "This should be all set up now."
+  exit
+}
+
+function check_root {
+  # Check if we are root
+  if [ "$(whoami)" != "root" ]; then
+    echo "Please run this script as root."
+    exit
+  else
+    echo "Kernel toolchain builder"
+  fi
+}
+
+function check_pm {
+  if which apt-get >/dev/null; then
+    pmsig="apt"
+    pm="apt-get -q -y install"
+    export DEBIAN_FRONTEND=noninteractive
+  elif which yum >/dev/null; then
+    pmsig="yum"
+    pm="yum -q -y install"
+    echo "Support for yum isn't finished."
+    echo "There is a chance that qemu, binutils \
+          and gcc won't compile."
+    echo "In this case, please resolve the dependencies manually \
+          and run this script again."
+  else
+    echo "Your package manager is not supported."
+    echo "Please consider using apt or yum."
+    exit
+  fi
+  echo "Using $pmsig as package manager."
+}
+
+function prepare_make {
+  processor_cores=$(grep -c ^processor /proc/cpuinfo)
+  echo "Found $processor_cores processor cores."
+  make_threads=$((processor_cores + 1))
+  echo "Using $make_threads make threads."
+}
+
+function install_apt {
+  if [ "$pmsig" == "apt" ]; then
+    echo "[Installing] $*"
+    $pm $* >/dev/null
+  fi
+}
+
+function install_yum {
+  if [ "$pmsig" == "yum" ]; then
+    echo "[Installing] $*"
+    $pm $* >/dev/null
+  fi
+}
+
+function update_packages {
+  echo "Updating package index..."
+  case "$pm" in
+    "apt")
+    apt-get -qq -y update >/dev/null
+    ;;
+  esac
+}
+
+function install_dependencies_apt {
+  # required
+  install_apt build-essential
+  install_apt grub-common
+  install_apt xorriso
+  install_apt wget
+  install_apt tar
+  # qemu required
+  install_apt git libglib2.0-dev
+  install_apt libglib2.0-dev libfdt-dev
+  install_apt libpixman-1-dev zlib1g-dev
+  # qemu recommended
+  install_apt libaio-dev libbluetooth-dev
+  install_apt libbrlapi-dev libbz2-dev
+  install_apt libcap-dev libcap-ng-dev
+  install_apt libcurl4-gnutls-dev libgtk-3-dev
+  install_apt libibverbs-dev libjpeg8-dev
+  install_apt libncurses5-dev libnuma-dev
+  install_apt librbd-dev librdmacm-dev
+  install_apt libsasl2-dev libsdl1.2-dev
+  install_apt libseccomp-dev libsnappy-dev
+  install_apt libssh2-1-dev
+  install_apt libvde-dev libvdeplug-dev
+  install_apt libvte-2.90-dev libxen-dev
+  install_apt liblzo2-dev
+  install_apt valgrind xfslibs-dev
+  install_apt libnfs-dev libiscsi-dev
+  # gcc required
+  install_apt libgmp10 libgmp-dev
+  install_apt libmpfr4 libmpfr-dev
+  install_apt libmpc3 libmpc-dev
+}
+
+function install_dependencies_yum {
+  #required
+  install_yum gcc gcc-c++ kernel_devel
+  install_yum grub2
+  install_yum xorriso
+  install_yum wget
+  install_yum tar
+  #qemu required
+  install_yum git
+  install_yum libfdt-devel
+  #qemu recommended
+  install_yum gtk2-devel
+  install_yum vte-devel
+  #gcc required
+}
+
+function build_qemu {
+  echo "[Checking] qemu-system-i386"
+  if which qemu-system-i386 >/dev/null; then
+    echo "[OK] qemu-system-i386"
+    return
+  fi
+  set qemu="qemu-2.3.0-rc0"
+  echo "Downlading $qemu..."
+  wget "http://wiki.qemu-project.org/download/$qemu.tar.bz2"
+  echo "Unpacking $qemu"
+  tar xfvj "$qemu.tar.bz2"
+  echo "Building qemu i386-softmmu..."
+  echo "This can take a long time on some systems..."
+  mkdir build-qemu
+  cd build-qemu
+  ../$qemu/configure --target-list="i386-softmmu"
+  make -j $make_threads
+  make -j $make_threads install
+  cd ../
+}
+
+function prepare_toolchain {
+  export PREFIX="$HOME/opt/cross"
+  export TARGET=i686-elf
+  export PATH="$PREFIX/bin:$PATH"
+}
+
+function build_binutils {
+  set binutils="binutils-2.25"
+  echo "Downloading $binutils..."
+  wget "https://ftp.gnu.org/gnu/binutils/$binutils.tar.bz2"
+  echo "Unpacking $binutils"
+  tar xfvj "$binutils.tar.bz2"
+  echo "Building binutils..."
+  binutils_switches="--with-sysroot --disable-nls --disable-werror"
+  mkdir build-binutils
+  cd build-binutils
+  ../$binutils/configure --target=$TARGET --prefix="$PREFIX" $binutils_switches
+  make -j $make_threads
+  make -j $make_threads install
+  cd ../
+}
+
+function check_cc {
+  echo "Looking for cross-compiler in ~/opt/cross"
+  if [ -d "$HOME/opt/cross/bin" ]; then
+    echo "[OK] Cross-compiler"
+    echo "Done!"
+  else
+    echo "A gcc cross-compiler targeting i686-elf will be built."
+    echo "This can take a long time on some systems."
+    prepare_toolchain
+    build_binutils
+    build_gcc
+  fi
+}
+
+function build_gcc {
+  set gcc="gcc-4.8.2"
+  echo "Downloading $gcc..."
+  wget "https://ftp.gnu.org/gnu/gcc/gcc-4.8.2/$gcc.tar.bz2"
+  echo "Unpacking $gcc"
+  tar xfvj "$gcc.tar.bz2"
+  echo "Building gcc with c and c++ support..."
+  gcc_switches="--disable-nls --enable-languages=c,c++ --without-headers"
+  mkdir build-gcc
+  cd build-gcc
+  ../$gcc/configure --target=$TARGET --prefix="$PREFIX" $gcc_switches
+  make -j $make_threads all-gcc
+  make -j $make_threads all-target-libgcc
+  make -j $make_threads install-gcc
+  make -j $make_threads install-target-libgcc
+  cd ../
+  echo "Testing if everything is working..."
+  gcc_version=$($HOME/opt/cross/bin/$TARGET-gcc --version)
+  binutils_version=$($HOME/opt/cross/bin/$TARGET-ld --version)
+  echo "You should see the gcc-version now: $gcc_version"
+  echo "You should see the binutils-version now: $binutils_version"
+}
+
+function create_kernel_env {
+  echo "Creating kernel directories"
+  cd ../
+  if [ ! -d "iso" ]; then mkdir -m 777 iso; fi
+  if [ ! -d "iso/boot" ]; then mkdir -m 777 iso/boot; fi
+  if [ ! -d "iso/boot/grub" ]; then mkdir -m 777 iso/boot/grub; fi
+  if [ ! -d "src" ]; then mkdir -m 777 src; fi
+  if [ ! -d "src/includes" ]; then mkdir -m 777 src/includes; fi
+  if [ ! -f "src/boot.S" ]; then
+    echo "Creating boot.S in src/"
+    touch src/boot.S
+    chmod 777 src/boot.S
+  fi
+  if [ ! -f "src/kmain.c" ]; then
+    echo "Creating kmain.c in src/"
+    touch src/kmain.c
+    chmod 777 src/kmain.c
+  fi
+  if [ ! -f "iso/boot/grub/grub.cfg" ]; then
+    echo "Creating grub.cgf in iso/boot/grub/"
+    touch iso/boot/grub/grub.cfg
+    chmod 777 iso/boot/grub/grub.cfg
+    echo -e "menuentry \"MyOS\" {" >iso/boot/grub/grub.cfg
+    echo -e "\tmultiboot /boot/kernel.bin" >>iso/boot/grub/grub.cfg
+    echo -e "}" >> iso/boot/grub/grub.cfg
+  fi
+}
+
+main
