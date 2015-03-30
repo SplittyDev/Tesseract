@@ -7,11 +7,11 @@
 #include <io/ports.h>
 
 struct {
-	uint16_t	limit;
-	void 			*pointer;
+    uint16_t	limit;
+    void 			*pointer;
 } __attribute__((packed)) idt_ptr = {
-	.limit		= (sizeof (struct idt_entry) * 256) - 1,
-	.pointer	= &idt,
+    .limit		= (sizeof (struct idt_entry) * 256) - 1,
+    .pointer	= &idt,
 };
 
 void idt_set_gate         (uint8_t, uint32_t, uint16_t, uint8_t);
