@@ -5,12 +5,13 @@
 #include <hardware/idt.h>
 
 void init (void) {
+  asm volatile ("cli");
   init_terminal ();
   init_gdt ();
+  init_pic ();
   init_idt ();
-  asm volatile ("sti");
+  //asm volatile ("sti");
   puts ("Hello from Tesseract!");
   while (true) {
-    asm volatile ("hlt");
   }
 }

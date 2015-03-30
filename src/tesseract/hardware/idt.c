@@ -6,8 +6,13 @@
 #include <io/terminal.h>
 #include <io/ports.h>
 
-idtentry_t  idt[IDT_ENTRIES];
-idtptr_t    idt_ptr;
+struct {
+	uint16_t	limit;
+	void 			*pointer;
+} __attribute__((packed)) idt_ptr = {
+	.limit		= (sizeof (struct idt_entry) * 256) - 1,
+	.pointer	= &idt,
+};
 
 void idt_set_gate         (uint8_t, uint32_t, uint16_t, uint8_t);
 void idt_set_exceptions   (void);
@@ -18,40 +23,11 @@ void idt_handle_exception (stackframe_t *);
 void idt_handle_irq       (stackframe_t *);
 inline void idt_load      (void);
 
-uint8_t *exception_messages[] =
-{
-	"*** DIVIDE BY ZERO EXCEPTION\n",              // 0x00
-	"*** DEBUG EXCEPTION\n",                       // 0x01
-	"*** NON MASKABLE INTERRUPT EXCEPTION\n",      // 0x02
-	"*** BREAKPOINT EXCEPTION\n",                  // 0x03
-	"*** INTO DETECTED OVERFLOW EXCEPTION\n",      // 0x04
-	"*** OUT OF BOUNDS EXCEPTION\n",               // 0x05
-	"*** INVALID OPCODE EXCEPTION\n",              // 0x06
-	"*** NO COPROCESSOR EXCEPTION\n",              // 0x07
-	"*** DOUBLE FAULT EXCEPTION\n",                // 0x08
-	"*** COPROCESSOR SEGMENT OVERRUN EXCEPTION\n", // 0x09
-	"*** BAD TSS EXCEPTION\n",                     // 0x0A
-	"*** SEGMENT NOT PRESENT EXCEPTION\n",         // 0x0B
-	"*** STACK FAULT EXCEPTION\n",                 // 0x0C
-	"*** GENERAL PROTECTION FAULT EXCEPTION\n",    // 0x0D
-	"*** PAGE FAULT EXCEPTION\n",                  // 0x0E
-	"*** UNKNOWN INTERRUPT EXCEPTION\n",           // 0x0F
-	"*** COPROCESSOR FAULT EXCEPTION\n",           // 0x10
-	"*** ALIGNMENT CHECK EXCEPTION\n",             // 0x11
-  "*** MACHINE CHECK EXCEPTION\n",               // 0x12
-};
-
 void init_idt (void) {
-  idt_remap ();
-
-  idt_ptr.limit = (sizeof (idtentry_t) * IDT_ENTRIES) - 1;
-  idt_ptr.base  = &idt;
-
   idt_set_exceptions ();
   idt_set_irqs ();
   idt_set_syscalls ();
-
-  memset (&idt, 0, sizeof (idtentry_t) * IDT_ENTRIES);
+  memset (&idt, 0, sizeof (struct idt_entry) * IDT_ENTRIES);
   idt_load ();
 }
 
@@ -65,19 +41,6 @@ void idt_set_gate (uint8_t num, uint32_t base, uint16_t sel, uint8_t flags) {
   idt[num].sel        = (sel);
   idt[num].flags      = (flags);
   idt[num].zero       = 0;
-}
-
-void idt_remap (void) {
-  outb (0x20, 0x11);
-  outb (0xA0, 0x11);
-  outb (0x21, 0x20);
-  outb (0xA1, 0x28);
-  outb (0x21, 0x04);
-  outb (0xA1, 0x02);
-  outb (0x21, 0x01);
-  outb (0xA1, 0x01);
-  outb (0x21, 0x0);
-  outb (0xA1, 0x0);
 }
 
 stackframe_t *idt_handle_general (stackframe_t *frame) {

@@ -5,18 +5,15 @@
 
 #define IDT_ENTRIES 256
 
-typedef struct idt_entry {
+struct idt_entry {
   uint16_t  base_low;
   uint16_t  sel;
   uint8_t   zero;
   uint8_t   flags;
   uint16_t  base_high;
-} __attribute__((packed)) idtentry_t;
+} __attribute__((packed));
 
-typedef struct idt_pointer {
-  uint16_t  limit;
-  void      *base;
-} __attribute__((packed)) idtptr_t;
+struct idt_entry idt[IDT_ENTRIES];
 
 void init_idt (void);
 stackframe_t *idt_handle_general (stackframe_t *);

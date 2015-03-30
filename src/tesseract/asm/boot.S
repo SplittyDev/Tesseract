@@ -27,9 +27,7 @@
 
 _start:
   mov $stack_top, %esp
-  cli
   call init
-  jmp _stop
 
 _stop:
   cli
@@ -44,7 +42,8 @@ gdt_flush:
   mov %ax, %fs
   mov %ax, %gs
   mov %ax, %ss
-  jmp $0x8, $gdt_flush2
+  ljmp $0x8, $gdt_flush2
+  ret
 gdt_flush2:
   ret
 
@@ -72,7 +71,7 @@ isr_wrapper:
   pop %es
   pop %ds
   popa
-  add $8, %esp
+  add $0x8, %esp
   iret
 
 .macro isr num

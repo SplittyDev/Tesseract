@@ -48,4 +48,4 @@ cd ../
 cp kernel iso/boot/kernel.bin
 
 # Run Tesseract kernel
-./run
+./run $*
