@@ -10,7 +10,7 @@ void init (void) {
   init_gdt ();
   init_pic ();
   init_idt ();
-  //asm volatile ("sti");
+  asm volatile ("sti");
   puts ("Hello from Tesseract!");
   while (true) {
   }

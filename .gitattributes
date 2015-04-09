@@ -1,1 +1,2 @@
 *.c filter=tabspace
+*.S filter=tabspace
