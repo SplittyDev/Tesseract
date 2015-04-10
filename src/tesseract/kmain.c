@@ -5,13 +5,13 @@
 #include <hardware/idt.h>
 
 void init (void) {
-  asm volatile ("cli");
+  IRQ_OFF;
   init_terminal ();
   init_gdt ();
   init_pic ();
   init_idt ();
-  asm volatile ("sti");
-  puts ("Hello from Tesseract!");
+  printf ("%s", "Hello, World!");
+  IRQ_ON;
   while (true) {
   }
 }

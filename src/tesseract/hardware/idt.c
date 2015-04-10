@@ -22,8 +22,9 @@ void idt_handle_general (stackframe_t *);
 void idt_handle_exception (stackframe_t *);
 
 void init_idt (void) {
+
   // Clear IDT
-  memset (&idt, 0, sizeof(struct idt_entry) * 256);
+  memset ((void *)&idt, 0, sizeof(struct idt_entry) * 256);
 
   // Exceptions
   idt_set_gate (0x00, (unsigned) isr0,  0x08, 0x8E);
@@ -143,6 +144,7 @@ void idt_handle_exception (stackframe_t *frame) {
 }
 
 void idt_handle_irq (stackframe_t *frame) {
+
   // Blank IRQ handler
   void (*handler)(stackframe_t *frame);
 
@@ -158,6 +160,7 @@ void idt_handle_syscall (stackframe_t *frame) {
 }
 
 void idt_handle_general (stackframe_t *frame) {
+
   // Exceptions
   if (frame->intr <= 0x1F) {
 

@@ -2,6 +2,9 @@
 #define __system__
 #include <system/typedef.h>
 
+#define IRQ_ON  asm volatile ("sti")
+#define IRQ_OFF asm volatile ("cli")
+
 typedef struct stackframe {
   uint32_t gs, fs, es, ds;
   uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;

@@ -67,8 +67,8 @@ void scroll (void) {
   if (y >= TERMINAL_HEIGHT) {
     uint8_t tmp  = y - TERMINAL_HEIGHT + 1;
     uint8_t tmp2 = (TERMINAL_HEIGHT - tmp) * TERMINAL_WIDTH;
-    memcopy (ptr, ptr + tmp * TERMINAL_WIDTH, tmp2 * 2);
-    memset (ptr + tmp2, makeattrib (KEY_BLANK), TERMINAL_WIDTH);
+    memcpy ((void *)ptr, (void *)(ptr + tmp * TERMINAL_WIDTH), tmp2 * 2);
+    memset ((void *)(ptr + tmp2), makeattrib (KEY_BLANK), TERMINAL_WIDTH);
     y = TERMINAL_HEIGHT - 1;
   }
 }
@@ -76,7 +76,7 @@ void scroll (void) {
 void clear (void) {
   size_t i = 0;
   for (; i < TERMINAL_HEIGHT; i++)
-    memset (ptr + i * TERMINAL_WIDTH, KEY_BLANK, TERMINAL_WIDTH);
+    memset ((void *)(ptr + i * TERMINAL_WIDTH), KEY_BLANK, TERMINAL_WIDTH);
   x = 0;
   y = 0;
   cursor ();
