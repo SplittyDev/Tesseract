@@ -10,8 +10,9 @@ void init (void) {
   init_gdt ();
   init_pic ();
   init_idt ();
-  printf ("%s", "Hello, World!");
   IRQ_ON;
+  printf ("Tesseract");
   while (true) {
+    
   }
 }

@@ -4,6 +4,7 @@
 #include <stdlib/stdarg.h>
 
 void vsprintf (char *, const char *, va_list);
-void sprintf (char *, const char *, ...);
+char *sprintf (const char *, ...);
+void printf (const char *, ...);
 
 #endif
