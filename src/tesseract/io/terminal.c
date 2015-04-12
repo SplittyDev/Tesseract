@@ -23,6 +23,24 @@ void init_terminal (void) {
   ptr = (uintptr_t *)TEXTMEMPTR;
 }
 
+void set_background_color (uint8_t color) {
+  background = color;
+}
+
+void set_foreground_color (uint8_t color) {
+  foreground = color;
+}
+
+void set_color (uint8_t bg, uint8_t fg) {
+  background = bg;
+  foreground = fg;
+}
+
+void reset_color () {
+  background = COLOR_BLACK;
+  foreground = COLOR_WHITE;
+}
+
 void putc_internal (const uint8_t chr, bool_t singleop) {
   switch (chr) {
     case KEY_BACKSPACE:

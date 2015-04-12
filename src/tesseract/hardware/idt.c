@@ -3,8 +3,9 @@
 #include <system/system.h>
 #include <system/typedef.h>
 #include <io/memory.h>
-#include <io/terminal.h>
 #include <io/ports.h>
+#include <io/terminal.h>
+#include <stdlib/stdio.h>
 
 struct {
     uint16_t	limit;
@@ -112,30 +113,27 @@ void idt_uninstall_handler (int8_t irq) {
 
 void idt_handle_exception (stackframe_t *frame) {
   // Print exception message
-  puts (exception_messages[frame->intr]);
-
-  /*
-  // Print debug information
-  uint8_t buf[13];
-  puts ("[CPU State]");
-  puts ("\nGS: ");      puts (itoa (frame->gs,      buf));
-  puts ("\t\tFS: ");    puts (itoa (frame->fs,      buf));
-  puts ("\t\tES: ");    puts (itoa (frame->es,      buf));
-  puts ("\nDS: ");      puts (itoa (frame->ds,      buf));
-  puts ("\t\tEDI: ");   puts (itoa (frame->edi,     buf));
-  puts ("\t\tESI: ");   puts (itoa (frame->esi,     buf));
-  puts ("\nEBP: ");     puts (itoa (frame->ebp,     buf));
-  puts ("\t\tESP: ");   puts (itoa (frame->esp,     buf));
-  puts ("\tEBX: ");     puts (itoa (frame->ebx,     buf));
-  puts ("\nEDX: ");     puts (itoa (frame->edx,     buf));
-  puts ("\t\tECX: ");   puts (itoa (frame->ecx,     buf));
-  puts ("\tEAX: ");     puts (itoa (frame->eax,     buf));
-  puts ("\nEIP: ");     puts (itoa (frame->eip,     buf));
-  puts ("\tCS: ");      puts (itoa (frame->cs,      buf));
-  puts ("\t\tSS: ");    puts (itoa (frame->ss,      buf));
-  puts ("\nEFLAGS: ");  puts (itoa (frame->eflags,  buf));
-  puts ("\tUSERESP: "); puts (itoa (frame->useresp, buf));
-  */
+  set_foreground_color (COLOR_RED);
+  printf ("\nEXCEPTION: %s\n", exception_messages[frame->intr]);
+  reset_color ();
+  printf ("[CPU state]\n");
+  printf ("GS     : %x\n",  frame->gs);
+  printf ("FS     : %x\n",  frame->fs);
+  printf ("ES     : %x\n",  frame->es);
+  printf ("DS     : %x\n",  frame->ds);
+  printf ("EDI    : %x\n",  frame->edi);
+  printf ("ESI    : %x\n",  frame->esi);
+  printf ("EBP    : %x\n",  frame->ebp);
+  printf ("ESP    : %x\n",  frame->esp);
+  printf ("EBX    : %x\n",  frame->ebx);
+  printf ("EDX    : %x\n",  frame->edx);
+  printf ("ECX    : %x\n",  frame->ecx);
+  printf ("EAX    : %x\n",  frame->eax);
+  printf ("EIP    : %x\n",  frame->eip);
+  printf ("CS     : %x\n",  frame->cs);
+  printf ("SS     : %x\n",  frame->ss);
+  printf ("EFLAGS : %x\n",  frame->eflags);
+  printf ("USERESP: %x\n",  frame->useresp);
 
   // Halt
   while (true) {

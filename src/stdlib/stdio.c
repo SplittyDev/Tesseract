@@ -38,6 +38,7 @@ void vsprintf (char *dest, const char *format, va_list argp) {
         strcpy ((char *)(dest + ptr), va_arg (argp, char *));
         ptr = strlen (dest);
         break;
+        case 'i':
         case 'd':
         itoa (nbuf, va_arg (argp, int));
         strcpy ((char *)(dest + ptr), nbuf);

@@ -38,5 +38,8 @@ void puts (const uint8_t *);
 void scroll (void);
 void cursor (void);
 void clear (void);
+void set_background_color (uint8_t);
+void set_foreground_color (uint8_t);
+void set_color (uint8_t, uint8_t);
 
 #endif
