@@ -2,9 +2,10 @@
 #include <system/kheap.h>
 #include <system/typedef.h>
 
-void init_kheap (kheap_t *heap, uint32_t bsize) {
+int init_kheap (kheap_t *heap, uint32_t bsize) {
   heap->fblock = 0;
   heap->bsize = bsize;
+  return 1;
 }
 
 int kheap_addblock (kheap_t *heap, uintptr_t addr, uint32_t size) {

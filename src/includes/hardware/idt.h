@@ -17,7 +17,7 @@ struct idt_entry
 
 struct idt_entry idt[IDT_ENTRIES];
 
-void init_idt (void);
+int  init_idt (void);
 void idt_install_handler (int8_t, void (*)(stackframe_t *));
 void idt_uninstall_handler (int8_t);
 

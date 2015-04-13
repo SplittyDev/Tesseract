@@ -15,7 +15,7 @@ typedef struct kheap {
   uint32_t           bsize;
 } kheap_t;
 
-void init_kheap (kheap_t *, uint32_t);
+int init_kheap (kheap_t *, uint32_t);
 int kheap_addblock (kheap_t *, uintptr_t, uint32_t);
 void *kheap_alloc (kheap_t *, uint32_t);
 void kheap_free (kheap_t *, void *);

@@ -1,39 +1,36 @@
+#include <system/multiboot.h>
 #include <system/typedef.h>
 #include <system/system.h>
+#include <system/kheap.h>
 #include <io/terminal.h>
 #include <hardware/gdt.h>
+#include <hardware/pic.h>
 #include <hardware/idt.h>
-#include <fs/fat/ff.h>
+#include <hardware/rtc.h>
 
-void init (void) {
+void main (void);
+
+void invoke (char *msg, int (*func)()) {
+  printf ("%s %s\n", msg, func () ? "OK" : "FAIL");
+}
+
+void init (multiboot_info_t *mbootinfo) {
+  void *kheap = *(uint32_t *)(mbootinfo->mods_addr + 4);
   IRQ_OFF;
+  init_kheap (kheap, 4096);
   init_terminal ();
   init_gdt ();
   init_pic ();
   init_idt ();
+  init_rtc ();
   IRQ_ON;
-  printf ("Tesseract booted.\n");
-  while (true) {
-  }
+  main ();
 }
 
 void main (void) {
-  FATFS   fs;
-  FIL     file;
-  FRESULT fres;
-
-  printf ("Mounting partition... ");
-  fres = f_mount (&fs, "", 0);
-  if (fres == FR_OK) printf ("OK\n");
-  else printf ("FAIL\n");
-
-  printf ("Creating file: test.txt... ");
-  fres = f_open (&file, "test.txt", FA_WRITE | FA_CREATE_ALWAYS);
-  if (fres == FR_OK) {
-    printf ("OK\n");
-    uint32_t bw;
-    f_write (&file, "Test\r\n", 6, &bw);
-    f_close (&file);
+  printf ("Tesseract booted.\n");
+  date_t date = rtc_get_date ();
+  printf ("%s, the %dth of %s %d", DAY[date.dow-1], date.d, MONTH[date.M-1], date.Y);
+  while (true) {
   }
-  else printf ("FAIL\n");
 }

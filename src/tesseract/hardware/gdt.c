@@ -11,7 +11,7 @@ struct {
 
 void gdt_create_descriptor (size_t, uint32_t, uint32_t, uint16_t);
 
-void init_gdt (void) {
+int init_gdt (void) {
   gdt_create_descriptor (0, 0, 0, 0);
   gdt_create_descriptor (1, 0, 0x000FFFFF, (GDT_CODE_PL0));
   gdt_create_descriptor (2, 0, 0x000FFFFF, (GDT_DATA_PL0));
@@ -20,6 +20,7 @@ void init_gdt (void) {
   // -> TSS
   asm volatile ("lgdt %0" : : "m" (gdt_ptr));
   gdt_flush ();
+  return 1;
 }
 
 void gdt_create_descriptor

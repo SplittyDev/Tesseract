@@ -44,7 +44,7 @@
 
 static uint64_t gdt[GDT_ENTRIES];
 
-void init_gdt (void);
+int init_gdt (void);
 extern void gdt_flush (void);
 
 #endif

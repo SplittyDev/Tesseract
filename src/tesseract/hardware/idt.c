@@ -22,7 +22,7 @@ void idt_handle_syscall (stackframe_t *);
 void idt_handle_general (stackframe_t *);
 void idt_handle_exception (stackframe_t *);
 
-void init_idt (void) {
+int init_idt (void) {
 
   // Clear IDT
   memset ((void *)&idt, 0, sizeof(struct idt_entry) * 256);
@@ -81,6 +81,8 @@ void init_idt (void) {
 
   // Load IDT
   idt_load ();
+
+  return 1;
 }
 
 void idt_set_gate (uint8_t num, uint32_t base, uint16_t sel, uint8_t flags) {

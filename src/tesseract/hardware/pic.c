@@ -5,10 +5,11 @@ void pic_remap_master (void);
 void pic_remap_slave  (void);
 void pic_unmask       (void);
 
-void init_pic (void) {
+int init_pic (void) {
   pic_remap_master ();
   pic_remap_slave ();
   pic_unmask ();
+  return 1;
 }
 
 void pic_remap_master (void) {

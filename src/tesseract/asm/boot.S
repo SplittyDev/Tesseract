@@ -9,17 +9,14 @@
 .int  MB_MAGIC
 .int  MB_FLAGS
 .int  MB_CHECKSUM
-
-# Vesa
-#.int  0x00000000
-#.int  0x00000000
-#.int  0x00000000
-#.int  0x00000000
-#.int  0x00000000
-#.int  0x00000000
-#.int  0
-#.int  0
-#.int  24
+.int  0x00000000  # load_addr
+.int  0x00000000  # load_end_addr
+.int  0x00000000  # bss_end_addr
+.int  0x00000000  # entry_addr
+.int  0x00000000  # mode (0 = LFB)
+.int  0           # width
+.int  0           # height
+.int  32          # depth
 
 .section .text
 .extern init
