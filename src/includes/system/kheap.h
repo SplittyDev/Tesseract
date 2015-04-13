@@ -1,6 +1,8 @@
 #ifndef __kheap__
 #define __kheap__
 
+#include <system/typedef.h>
+
 typedef struct kheapblock {
   struct kheapblock *next;
   uint32_t           top;
@@ -16,6 +18,6 @@ typedef struct kheap {
 void init_kheap (kheap_t *, uint32_t);
 int kheap_addblock (kheap_t *, uintptr_t, uint32_t);
 void *kheap_alloc (kheap_t *, uint32_t);
-void kheap_free (kheaap_t *, void *);
+void kheap_free (kheap_t *, void *);
 
 #endif

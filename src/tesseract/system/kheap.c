@@ -1,5 +1,6 @@
 #include <stdlib/stdio.h>
 #include <system/kheap.h>
+#include <system/typedef.h>
 
 void init_kheap (kheap_t *heap, uint32_t bsize) {
   heap->fblock = 0;
@@ -13,7 +14,7 @@ int kheap_addblock (kheap_t *heap, uintptr_t addr, uint32_t size) {
   uint32_t       stacksz;
   uint32_t       slotres;
 
-  b = (kheapblock_t)addr;
+  b = (kheapblock_t *)addr;
   b->next = heap->fblock;
   heap->fblock = b;
 
@@ -53,7 +54,7 @@ void *kheap_alloc (kheap_t *heap, uint32_t size) {
   return 0;
 }
 
-void kheap_free (kheaap_t *heap, void *dest) {
+void kheap_free (kheap_t *heap, void *dest) {
   kheapblock_t  *b;
   uintptr_t      ptr;
   uint32_t      *stack;

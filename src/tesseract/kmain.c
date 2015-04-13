@@ -13,7 +13,6 @@ void init (void) {
   init_idt ();
   IRQ_ON;
   printf ("Tesseract booted.\n");
-  main ();
   while (true) {
   }
 }
