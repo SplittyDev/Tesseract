@@ -31,7 +31,7 @@ char *strrchr(const char *str, char ch)
     int i = 0;
 
     for (; i < dlen; i++)
-        if ((char *)str[i] == ch)
+        if (str[i] == ch)
             return (char *)(str + i);
     return NULL;
 }
@@ -43,7 +43,7 @@ char *strlchr(const char *str, char ch)
     int i = 0;
 
     for (; i < dlen; i++)
-        if ((char *)str[i] == ch)
+        if (str[i] == ch)
             rstr = (char *)(str + i);
     return rstr;
 }
@@ -55,7 +55,7 @@ int strindx(const char *str, char ch)
     int i = 0;
 
     for (; i < dlen; i++)
-        if ((char *)str[i] == ch)
+        if (str[i] == ch)
             return i;
     return -1;
 }

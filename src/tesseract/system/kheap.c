@@ -8,7 +8,7 @@ int init_kheap (kheap_t *heap, uint32_t bsize) {
   return 1;
 }
 
-int kheap_addblock (kheap_t *heap, uintptr_t addr, uint32_t size) {
+int kheap_addblock (kheap_t *heap, uint32_t addr, uint32_t size) {
   kheapblock_t  *b;
   uint32_t       x;
   uint32_t      *stack;
@@ -37,7 +37,7 @@ int kheap_addblock (kheap_t *heap, uintptr_t addr, uint32_t size) {
 
 void *kheap_alloc (kheap_t *heap, uint32_t size) {
   kheapblock_t  *b;
-  uintptr_t      ptr;
+  uint32_t       ptr;
   uint32_t      *stack;
 
   if (size > heap->bsize)
@@ -47,7 +47,7 @@ void *kheap_alloc (kheap_t *heap, uint32_t size) {
     if (b->top != b->max) {
       stack = (uint32_t *)&b[1];
       ptr = stack[b->top++];
-      ptr = (uintptr_t)&b[1] + ptr;
+      ptr = (uint32_t)&b[1] + ptr;
       return (void *)ptr;
     }
   }
@@ -57,12 +57,12 @@ void *kheap_alloc (kheap_t *heap, uint32_t size) {
 
 void kheap_free (kheap_t *heap, void *dest) {
   kheapblock_t  *b;
-  uintptr_t      ptr;
+  uint32_t       ptr;
   uint32_t      *stack;
 
-  ptr = (uintptr_t)dest;
+  ptr = (uint32_t)dest;
   for (b = heap->fblock; b; b = b->next) {
-    if (ptr > (uintptr_t)b && ptr < ((uintptr_t)b + b->size))
+    if (ptr > (uint32_t)b && ptr < ((uint32_t)b + b->size))
       break;
   }
 
@@ -72,6 +72,6 @@ void kheap_free (kheap_t *heap, void *dest) {
 
   stack = (uint32_t *)&b[1];
 
-  stack[--b->top] = ptr - (uintptr_t)&b[1];
+  stack[--b->top] = ptr - (uint32_t)&b[1];
   return;
 }

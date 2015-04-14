@@ -15,7 +15,7 @@ void invoke (char *msg, int (*func)()) {
 }
 
 void init (multiboot_info_t *mbootinfo) {
-  void *kheap = *(uint32_t *)(mbootinfo->mods_addr + 4);
+  void *kheap = (uint32_t *)(mbootinfo->mods_addr + 4);
   IRQ_OFF;
   init_kheap (kheap, 4096);
   init_terminal ();
@@ -23,6 +23,10 @@ void init (multiboot_info_t *mbootinfo) {
   init_pic ();
   init_idt ();
   init_rtc ();
+  printf ("Heap, GDT, PIC, IDT and RTC initialized.\n");
+  printf ("Gathering video information form multiboot header...\n");
+  printf ("Framebuffer width: %d\n", mbootinfo->framebuffer_width);
+  printf ("Framebuffer height: %d\n", mbootinfo->framebuffer_height);
   IRQ_ON;
   main ();
 }

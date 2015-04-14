@@ -33,13 +33,13 @@ int init_rtc (void) {
 }
 
 uint8_t readregb (uint16_t dump[128], uint8_t pos) {
-  uint8_t *tmp;
+  uint8_t tmp;
   tmp = bcdtoib (dump[pos]);
   return tmp;
 }
 
 uint16_t readregs (uint16_t dump[128], uint8_t pos) {
-  uint16_t *tmp;
+  uint16_t tmp;
   tmp = bcdtoib (dump[pos]);
   return tmp;
 }

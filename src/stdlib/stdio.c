@@ -27,7 +27,7 @@ void vsprintf (char *dest, const char *format, va_list argp) {
   int i = 0;
   char nbuf[16];
   for (; i < len; i++) {
-    char *c = format[i];
+    char c = *(format + i);
     if (c == '%') {
       char spec = format[++i];
       switch (spec) {
@@ -67,11 +67,9 @@ void vsprintf (char *dest, const char *format, va_list argp) {
   }
 }
 
-char *sprintf (const char *format, ...) {
+char *sprintf (char buf[], const char *format, ...) {
   va_list argp;
   va_start (argp, format);
-  char buf[512];
-  memset ((void *)buf, 0, 512);
   vsprintf (buf, format, argp);
   va_end (argp);
   return buf;
